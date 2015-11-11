@@ -56,8 +56,9 @@ public class MainExtractor {
 	
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		String directory = null;
 		String ontologyName = null;
 		//parse arguments
@@ -167,7 +168,7 @@ public class MainExtractor {
 
 
 	
-	private static void cellmlMode(String modelDir) {
+	private static void cellmlMode(String modelDir) throws IOException {
 		//cache cellml files
 		File cellmlCacheDir = new File (Config.instance().getCachePath()+"cellml/");
 		cellmlCacheDir.mkdirs();
@@ -222,7 +223,7 @@ public class MainExtractor {
 		}
 	}
 	
-	private static void sbmlMode(String modelDir) {
+	private static void sbmlMode(String modelDir) throws IOException {
 		//cache sbml files
 		File sbmlCacheDir = new File (Config.instance().getCachePath()+"sbml/");
 		sbmlCacheDir.mkdirs();
