@@ -15,6 +15,7 @@ import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.QueryAdapter;
+import de.unirostock.sems.masymos.query.aggregation.RankAggregation;
 import de.unirostock.sems.masymos.query.enumerator.AnnotationFieldEnumerator;
 import de.unirostock.sems.masymos.query.enumerator.CellMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.enumerator.PersonFieldEnumerator;
@@ -438,11 +439,16 @@ public class MainQuery {
 				qL.add(ppq);
 				qL.add(sq);
 				qL.add(cq);
+					
 				
 				results = QueryAdapter.executeMultipleQueriesForModels(qL);
 				if (!StringUtils.isEmpty(dumpPath)) ModelResultSetWriter.writeModelResults(results, qL, dumpPath);
 				results = ResultSetUtil.collateModelResultSetByModelId(results);
 				//results = ResultSetUtil.sortModelResultSetByScore(results);
+				
+				//change
+				results = RankAggregation.aggregate(null, null, RankAggregation.AggregationType.adj);
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
