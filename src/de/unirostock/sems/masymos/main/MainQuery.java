@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import de.unirostock.sems.masymos.configuration.Config;
+import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.IQueryInterface;
@@ -447,7 +448,7 @@ public class MainQuery {
 				//results = ResultSetUtil.sortModelResultSetByScore(results);
 				
 				//change
-				results = RankAggregation.aggregate(null, null, RankAggregation.AggregationType.adj);
+				results = RankAggregation.aggregate(null, null, RankAggregationType.Types.ADJACENT_PAIRS);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
