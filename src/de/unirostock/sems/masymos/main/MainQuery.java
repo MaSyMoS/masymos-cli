@@ -36,6 +36,7 @@ import de.unirostock.sems.masymos.query.types.PublicationQuery;
 import de.unirostock.sems.masymos.query.types.SBMLModelQuery;
 import de.unirostock.sems.masymos.query.types.SedmlQuery;
 import de.unirostock.sems.masymos.util.ModelResultSetWriter;
+import de.unirostock.sems.masymos.util.RankAggregationUtil;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 import de.unirostock.sems.masymos.util.SBGN2Cypher;
 
@@ -68,7 +69,7 @@ public class MainQuery {
 			System.out
 					.println("QueryType: (1) sbmlmodeliq, (2) cellmlmodeliq, (3) annoiq->model, (4) persiq->model, "
 							+ "(5) pubiq->model, (6) annoiq, (7) persiq, (8) pubiq, "
-							+ "(9) all, (10) cypher, (11) sedml, (12) sbgn: ");
+							+ "(9) all, (10) all aggregated, (11) cypher, (12) sedml, (13) sbgn: ");
 			try {
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						System.in));
@@ -99,12 +100,14 @@ public class MainQuery {
 				case 8:
 					publicationNativeInterfaceQuery(); break;					
 				case 9:
-					allInterfaceQuery(); break;	
+					allInterfaceQuery(RankAggregationType.Types.DEFAULT); break;	
 				case 10:
-					structureQuery(); break;
+					allInterfaceQuery(RankAggregationType.Types.COMB_MNZ); break;
 				case 11:
-					sedmlNativeQuery(); break;	
+					structureQuery(); break;
 				case 12:
+					sedmlNativeQuery(); break;	
+				case 13:
 					sbgnQuery(); break;		
 			default:
 				continue;
@@ -398,7 +401,7 @@ public class MainQuery {
 	}
 	
 	
-	private static void allInterfaceQuery() {
+	private static void allInterfaceQuery(RankAggregationType.Types type) {
 		String s = "";
 		while (!s.equals("exit")) {
 			System.out.println("Query: ");
@@ -444,11 +447,10 @@ public class MainQuery {
 				
 				results = QueryAdapter.executeMultipleQueriesForModels(qL);
 				if (!StringUtils.isEmpty(dumpPath)) ModelResultSetWriter.writeModelResults(results, qL, dumpPath);
-				results = ResultSetUtil.collateModelResultSetByModelId(results);
-				//results = ResultSetUtil.sortModelResultSetByScore(results);
-				
-				//change
-				results = RankAggregation.aggregate(null, null, RankAggregationType.Types.ADJACENT_PAIRS);
+				List<ModelResultSet> initialAggregateRankers = ResultSetUtil.collateModelResultSetByModelId(results);
+				List<List<ModelResultSet>> splitResults = RankAggregationUtil.splitModelResultSetByIndex(results);
+			
+				results = RankAggregation.aggregate(splitResults, initialAggregateRankers, type);
 				
 			} catch (Exception e) {
 				e.printStackTrace();

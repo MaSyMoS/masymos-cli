@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -153,7 +154,20 @@ public class MainExtractor {
 	}
 
 	public static void owlMode(String directory, String ontologyName) {
-		Ontology.extractOntology(directory, ontologyName);
+		
+		if (StringUtils.isNotBlank(ontologyName)) { 
+			System.out.println("Processing: " + ontologyName);
+			Ontology.extractOntology(new File(directory), ontologyName);
+			return;
+		}
+		
+		File dir = new File(directory);
+		for (Iterator<File> fileIt = FileUtils.iterateFiles(dir, new String[]{"owl"}, false); fileIt.hasNext();) {
+			File file = (File) fileIt.next();
+			if (file.isDirectory()) continue;
+			System.out.println("Processing: " + file.getName());
+			Ontology.extractOntology(file, FilenameUtils.removeExtension(file.getName())); 
+		}	
 	}
 
 	public static void initializeDatabase(){
