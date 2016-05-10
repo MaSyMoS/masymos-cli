@@ -63,7 +63,7 @@ public class MainIndex {
 		long start = System.currentTimeMillis();
 		initializeDatabase();
 		Map<String, ReadableIndex<?>> indexMap = Manager.instance().getIndexMap();
-		try (Transaction tx = Manager.instance().createNewTransaction())
+		try (Transaction tx = Manager.instance().getDatabase().beginTx())
 		{
 			for (Iterator<ReadableIndex<?>> iterator = indexMap.values().iterator(); iterator.hasNext();) {
 				Index<?> index = (Index<?>) iterator.next();			

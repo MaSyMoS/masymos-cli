@@ -1,9 +1,11 @@
 package de.unirostock.sems.masymos.main;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -103,8 +105,13 @@ public class MainExtractor {
 			
 		}
 		
+//		PrintStream toFile = new PrintStream(new BufferedOutputStream(new FileOutputStream("E:/masymos-anno.txt")));
+//		System.setOut(toFile);
+		
+		
 		if (annotationOnly && noAnno) {
 			System.out.print("Illegal argument combination: noAnno & annoOnly");
+//			toFile.close();
 			System.exit(0);
 			return;
 		}
@@ -150,6 +157,7 @@ public class MainExtractor {
 		System.out.println("all done at: "+ new Date() + " needed: " + (System.currentTimeMillis()-start)+ "ms");
 		
 		//call exit explicitly in case there a zombi threads
+//		toFile.close();
 		System.exit(0);
 	}
 
@@ -248,7 +256,8 @@ public class MainExtractor {
 		PrintStream dev0 = new PrintStream(new OutputStream() {
 		    public void write(int b) {
 		    }
-		});
+		});	
+		
 		//parse and store a model
 		File directory = new File(modelDir);
 		List<String> urlList = new LinkedList<String>();

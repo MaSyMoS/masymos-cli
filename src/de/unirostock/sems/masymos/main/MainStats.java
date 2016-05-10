@@ -1021,7 +1021,7 @@ public class MainStats {
 			Result result;
 			Node root = OntologyUtil.getRoot(s);
 			Map<Integer, Long> depthMap = new HashMap<Integer,Long>();
-			try(Transaction tx = Manager.instance().createNewTransaction()){
+			try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 				GraphDatabaseService graphDB = Manager.instance().getDatabase();
 				result = graphDB.execute("match (o:" + s + "Ontology)<-[:ENTITY_TO_" + s.toUpperCase()  + "]-()  return o;");
 				for (ResourceIterator<Node> iterator = result.columnAs("o"); iterator
@@ -1052,7 +1052,7 @@ public class MainStats {
 		GraphDatabaseService graphDB = Manager.instance().getDatabase();
 		Result result;
 		Node root = OntologyUtil.getRoot(ontoPrefix);
-		try(Transaction tx = Manager.instance().createNewTransaction()){			
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){			
 			for (Iterator<String> iterator = conceptList.iterator(); iterator.hasNext();) {
 				String id = (String) iterator.next();
 				result = graphDB.execute("match (o:" + ontoPrefix + "Ontology) where (o.id='"+id+"') return o");			
