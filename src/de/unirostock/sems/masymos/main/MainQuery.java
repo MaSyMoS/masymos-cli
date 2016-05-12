@@ -102,7 +102,7 @@ public class MainQuery {
 				case 9:
 					allInterfaceQuery(RankAggregationType.Types.DEFAULT); break;	
 				case 10:
-					allInterfaceQuery(RankAggregationType.Types.COMB_MNZ); break;
+					allInterfaceQuery(RankAggregationType.Types.ADJACENT_PAIRS); break;
 				case 11:
 					structureQuery(); break;
 				case 12:
@@ -419,38 +419,88 @@ public class MainQuery {
 			System.out.println("Retrieving from all interfaces...");
 			List<ModelResultSet> results = null;
 			try {
-				AnnotationQuery aq = new AnnotationQuery();
-				aq.setBestN(20);
-				//aq.setThreshold(0.01f);
-				aq.addQueryClause(AnnotationFieldEnumerator.RESOURCETEXT, s);
+//				AnnotationQuery aq = new AnnotationQuery();
+//				aq.setBestN(20);
+//				//aq.setThreshold(0.01f);
+//				aq.addQueryClause(AnnotationFieldEnumerator.RESOURCETEXT, s);
+//				
+//				PersonQuery ppq = new PersonQuery();
+//				ppq.addQueryClause(PersonFieldEnumerator.NONE, s);
+//				
+//				SBMLModelQuery sq = new SBMLModelQuery();
+//				sq.addQueryClause(SBMLModelFieldEnumerator.NONE, s);
+//				
+//				CellMLModelQuery cq = new CellMLModelQuery();
+//				cq.addQueryClause(CellMLModelFieldEnumerator.NONE, s);
+//
+//				
+//				PublicationQuery pq = new PublicationQuery();
+//				pq.addQueryClause(PublicationFieldEnumerator.NONE, s);
+//				List<IQueryInterface> qL = new LinkedList<IQueryInterface>();
+//				
+//				qL.add(pq);
+//				qL.add(aq);
+//				qL.add(ppq);
+//				qL.add(sq);
+//				qL.add(cq);
 				
-				PersonQuery ppq = new PersonQuery();
-				ppq.addQueryClause(PersonFieldEnumerator.NONE, s);
 				
-				SBMLModelQuery sq = new SBMLModelQuery();
-				sq.addQueryClause(SBMLModelFieldEnumerator.NONE, s);
-				
-				CellMLModelQuery cq = new CellMLModelQuery();
-				cq.addQueryClause(CellMLModelFieldEnumerator.NONE, s);
-
-				
-				PublicationQuery pq = new PublicationQuery();
-				pq.addQueryClause(PublicationFieldEnumerator.NONE, s);
-				List<IQueryInterface> qL = new LinkedList<IQueryInterface>();
-				
-				qL.add(pq);
-				qL.add(aq);
-				qL.add(ppq);
-				qL.add(sq);
+		    	List<ModelResultSet> initialAggregateRanker = null;
+		    	
+		       	CellMLModelQuery cq = new CellMLModelQuery();
+		    	cq.addQueryClause(CellMLModelFieldEnumerator.NONE, s);
+		    	SBMLModelQuery sq = new SBMLModelQuery();
+		    	sq.addQueryClause(SBMLModelFieldEnumerator.NONE, s);
+		    	PersonQuery persq = new PersonQuery();
+		    	persq.addQueryClause(PersonFieldEnumerator.NONE, s);
+		    	PublicationQuery pubq = new PublicationQuery();
+		    	pubq.addQueryClause(PublicationFieldEnumerator.NONE, s);
+		    	AnnotationQuery aq = new AnnotationQuery();
+		    	//aq.setBestN(20);
+		    	aq.addQueryClause(AnnotationFieldEnumerator.NONE, s);
+		    	
+		    	
+		    	List<IQueryInterface> qL = new LinkedList<IQueryInterface>();
+		    	qL.add(sq);
 				qL.add(cq);
-					
+				qL.add(persq);
+				qL.add(pubq);
+				qL.add(aq);
+				
+				int rankersWeights = 0;
 				
 				results = QueryAdapter.executeMultipleQueriesForModels(qL);
 				if (!StringUtils.isEmpty(dumpPath)) ModelResultSetWriter.writeModelResults(results, qL, dumpPath);
-				List<ModelResultSet> initialAggregateRankers = ResultSetUtil.collateModelResultSetByModelId(results);
+				initialAggregateRanker = ResultSetUtil.collateModelResultSetByModelId(results);
 				List<List<ModelResultSet>> splitResults = RankAggregationUtil.splitModelResultSetByIndex(results);
-			
-				results = RankAggregation.aggregate(splitResults, initialAggregateRankers, type);
+				
+				if(type == RankAggregationType.Types.SUPERVISED_LOCAL_KEMENIZATION){
+					System.out.println("Model Ranker weight:");
+					BufferedReader in = new BufferedReader(new InputStreamReader(
+							System.in));
+					int weight = Integer.parseInt(in.readLine());
+					rankersWeights+= weight;
+					
+					System.out.println("Annotation Ranker weight:");
+					in = new BufferedReader(new InputStreamReader(
+							System.in));
+					weight = Integer.parseInt(in.readLine());
+					rankersWeights+= weight * 100;
+					
+					System.out.println("Person Ranker weight:");
+					in = new BufferedReader(new InputStreamReader(
+							System.in));
+					weight = Integer.parseInt(in.readLine());
+					rankersWeights+= weight * 10000;
+					
+					System.out.println("Publication Ranker weight:");
+					in = new BufferedReader(new InputStreamReader(
+							System.in));
+					weight = Integer.parseInt(in.readLine());
+					rankersWeights+= weight * 1000000;
+				}
+					
+				results = RankAggregation.aggregate(splitResults, initialAggregateRanker, type, rankersWeights);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
