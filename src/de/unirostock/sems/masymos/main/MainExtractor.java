@@ -34,6 +34,7 @@ import de.unirostock.sems.masymos.annotation.AnnotationResolverUtil;
 import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
+import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.extractor.Extractor;
 import de.unirostock.sems.masymos.extractor.CellML.CellMLExtractorThread;
@@ -217,29 +218,30 @@ public class MainExtractor {
 			i++;
 			System.out.print("Processing file# " + i +": " + url + " ...");
 			if (quiet) System.setOut(dev0);
-				String vID = Long.valueOf(System.nanoTime()).toString();				
+			
+			String vID = Long.valueOf(System.nanoTime()).toString();				
 				
-				CellMLExtractorThread cet = new CellMLExtractorThread(url, vID);
-				Node documentNode;
-				try {
-					documentNode = executor.submit(cet).get();
-				} catch (InterruptedException | ExecutionException e) {
-					GraphDatabaseService graphDB = Manager.instance().getDatabase();
+			CellMLExtractorThread cet = new CellMLExtractorThread(url, vID);
+			Node documentNode;
+			try {
+				documentNode = executor.submit(cet).get();
+			} catch (InterruptedException | ExecutionException e) {
+				GraphDatabaseService graphDB = Manager.instance().getDatabase();
 					
-					try (Transaction tx = graphDB.beginTx()){
-						documentNode = graphDB.createNode();				
-						documentNode.addLabel(NodeLabel.Types.DOCUMENT);
-						tx.success();
-					}					
-				}
+				try (Transaction tx = graphDB.beginTx()){
+					documentNode = graphDB.createNode();				
+					documentNode.addLabel(NodeLabel.Types.DOCUMENT);
+					tx.success();
+				}					
+			}
 				//Node documentNode = Extractor.extractStoreIndex(url,null,dID,Property.ModelType.CELLML); 
-				Map<String, String> propertyMap = new HashMap<String, String>();
-			    propertyMap.put(Property.General.URI, url);
-			    String filename;
-			    filename = StringUtils.substringAfterLast(url, "/");
-			    if (StringUtils.isEmpty(filename)) filename = StringUtils.substringAfterLast(StringUtils.substringBeforeLast(url, "/"), "/");
-			    propertyMap.put(Property.General.FILENAME, filename);
-				Extractor.setExternalDocumentInformation(documentNode, propertyMap);
+			Map<String, String> propertyMap = new HashMap<String, String>();
+			propertyMap.put(Property.General.URI, url);
+			String filename;
+			filename = StringUtils.substringAfterLast(url, "/");
+			if (StringUtils.isEmpty(filename)) filename = StringUtils.substringAfterLast(StringUtils.substringBeforeLast(url, "/"), "/");
+			propertyMap.put(Property.General.FILENAME, filename);
+			Extractor.setExternalDocumentInformation(documentNode, propertyMap);
 			if (quiet) System.setOut(stdOut);
 			System.out.println("done in " + (System.currentTimeMillis()-fileStart) + "ms");
 		}
@@ -371,13 +373,15 @@ public class MainExtractor {
 			System.out.print("Processing file# " + i +": " + file.getName() + " ... ");
 			if (quiet) System.setOut(dev0);
 			try {
+				   Long uID = IdFactory.instance().getID();	
 				   String vID = Long.valueOf(System.nanoTime()).toString();
-				   Node documentNode = SEDMLExtractor.extractStoreIndex(file, vID);
+				   Node documentNode = SEDMLExtractor.extractStoreIndexSEDML(file, vID, uID);
                    Map<String, String> propertyMap = new HashMap<String, String>();
 				
 				propertyMap.put(Property.General.URI, file.getPath());
                 propertyMap.put(Property.General.FILENAME, file.getName());
-                    SEDMLExtractor.setExternalDocumentInformation(documentNode, propertyMap);
+                Extractor.setExternalDocumentInformation(documentNode, propertyMap);
+                Extractor.setDocumentUID(documentNode, uID);
 			} catch (FileNotFoundException e) {
 				System.out.println("File " + file.getName() + "not found!");
 				e.printStackTrace();
@@ -415,12 +419,13 @@ public class MainExtractor {
 			if (quiet) System.setOut(dev0);
 			try {
 				String vID = Long.valueOf(System.nanoTime()).toString();
-
-				Node documentNode = SBMLExtractor.extractStoreIndex(new FileInputStream(file), vID);
+				Long uID = IdFactory.instance().getID();	
+				Node documentNode = SBMLExtractor.extractStoreIndexSBML(new FileInputStream(file), vID, uID);
 				Map<String, String> propertyMap = new HashMap<String, String>();
 			    propertyMap.put(Property.General.URI, file.getPath());
 			    propertyMap.put(Property.General.FILENAME, file.getName());
 				Extractor.setExternalDocumentInformation(documentNode, propertyMap);
+				Extractor.setDocumentUID(documentNode, uID);
 			} catch (FileNotFoundException e) {
 				System.out.println("File " + file.getName() + "not found!");
 				e.printStackTrace();

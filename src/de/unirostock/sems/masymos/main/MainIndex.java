@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.ReadableIndex;
@@ -62,10 +63,10 @@ public class MainIndex {
 	private static void deleteAllIndexes() {
 		long start = System.currentTimeMillis();
 		initializeDatabase();
-		Map<String, ReadableIndex<?>> indexMap = Manager.instance().getIndexMap();
+		Map<String, Index<Node>> indexMap = Manager.instance().getNodeIndexMap();
 		try (Transaction tx = Manager.instance().getDatabase().beginTx())
 		{
-			for (Iterator<ReadableIndex<?>> iterator = indexMap.values().iterator(); iterator.hasNext();) {
+			for (Iterator<Index<Node>> iterator = indexMap.values().iterator(); iterator.hasNext();) {
 				Index<?> index = (Index<?>) iterator.next();			
 				index.delete();		
 			}
