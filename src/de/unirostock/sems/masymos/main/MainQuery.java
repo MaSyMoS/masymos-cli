@@ -102,7 +102,41 @@ public class MainQuery {
 				case 9:
 					allInterfaceQuery(RankAggregationType.Types.DEFAULT); break;	
 				case 10:
-					allInterfaceQuery(RankAggregationType.Types.ADJACENT_PAIRS); break;
+					
+					int n = 5;
+					while (n != 0){
+						System.out.println("Enter:");
+						System.out.println("0 to exit");
+						System.out.println("1 for Adjacent pairs");
+						System.out.println("2 for CombMNZ");
+						System.out.println("3 for Local Kemenization");
+						System.out.println("4 for Supervised Local Kemenization");
+						System.out.println("5 for Default");
+						BufferedReader in = new BufferedReader(new InputStreamReader(
+								System.in));
+						try {
+							in = new BufferedReader(new InputStreamReader(
+									System.in));
+							n = Integer.parseInt(in.readLine());
+							if(n == 0)
+								break;
+							if(n == 1)
+								allInterfaceQuery(RankAggregationType.Types.ADJACENT_PAIRS); 
+							else if (n == 2)
+								allInterfaceQuery(RankAggregationType.Types.COMB_MNZ);
+							else if (n == 3)
+								allInterfaceQuery(RankAggregationType.Types.LOCAL_KEMENIZATION);
+							else if (n == 4)
+								allInterfaceQuery(RankAggregationType.Types.SUPERVISED_LOCAL_KEMENIZATION);
+							else if (n == 5)
+								allInterfaceQuery(RankAggregationType.Types.DEFAULT);
+
+						} catch (IOException ex) {
+							System.out.println(ex.getMessage());
+						}
+					
+					}
+					break;
 				case 11:
 					structureQuery(); break;
 				case 12:
