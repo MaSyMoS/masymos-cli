@@ -3,7 +3,6 @@ package de.unirostock.sems.masymos.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Date;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -12,9 +11,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
-import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.configuration.Property;
-import de.unirostock.sems.masymos.database.Manager;
 
 public class MainAnalyzer {
 	

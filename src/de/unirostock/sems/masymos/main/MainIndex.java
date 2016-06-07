@@ -8,7 +8,6 @@ import java.util.Map;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.ReadableIndex;
 
 import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.database.Manager;
