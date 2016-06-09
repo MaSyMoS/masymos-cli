@@ -7,24 +7,28 @@ import java.io.InputStreamReader;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.Property;
 
 public class MainAnalyzer {
 	
-	private static String dumpPath = null;
+	final static Logger logger = LoggerFactory.getLogger(MainAnalyzer.class);
 
 	public static void main(String[] args) {
-
+/*
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("-dumpPath")) {
 				dumpPath = args[++i];
 			}
 		}
-
+*/
+		logger.debug(MainAnalyzer.class.getName() + " started");
 		String s = "";
 		while (!s.equals("exit")) {
 			System.out
@@ -50,6 +54,8 @@ public class MainAnalyzer {
 				continue;
 			}
 		}
+		logger.debug(MainAnalyzer.class.getName() + " finished");
+		System.out.println("done");
 		System.exit(0);
 	}
 
@@ -101,11 +107,17 @@ public class MainAnalyzer {
 				q = qp.parse(s);
 				System.out.println();
 				System.out.println(a.getClass().getName() + " & " + qp.getField() + ": " + q.toString());
+				a = new StandardAnalyzer();
+				qp = new QueryParser("none", a);
+				q = qp.parse(s);
+				System.out.println();
+				System.out.println(a.getClass().getName() + " & " + qp.getField() + ": " + q.toString());
+			
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-
+		
 	}
 	
 
