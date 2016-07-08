@@ -3,12 +3,17 @@ package de.unirostock.sems.masymos.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.cypher.internal.frontend.v2_3.perty.recipe.Pretty.group;
 
 import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
@@ -25,6 +30,7 @@ import de.unirostock.sems.masymos.query.enumerator.SBMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.enumerator.SedmlFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.PersonResultSet;
 import de.unirostock.sems.masymos.query.results.PublicationResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
@@ -194,7 +200,7 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from anno interface...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
 			try {
 				AnnotationQuery aq = new AnnotationQuery();
 				aq.setBestN(20);
@@ -206,7 +212,7 @@ public class MainQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			printVersionResults(results);
 			System.out.println("done");
 		}
 
@@ -262,7 +268,7 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from person interface...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
 			try {
 				PersonQuery pq = new PersonQuery();
 				pq.addQueryClause(PersonFieldEnumerator.NONE, s);
@@ -272,7 +278,7 @@ public class MainQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			printVersionResults(results);
 			System.out.println("done");
 		}	
 	}
@@ -323,7 +329,7 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from SBML model interface...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
 			try {
 				SBMLModelQuery pq = new SBMLModelQuery();
 				pq.addQueryClause(SBMLModelFieldEnumerator.NONE, s);
@@ -333,7 +339,7 @@ public class MainQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			printVersionResults(results);
 			System.out.println("done");
 		}
 
@@ -355,7 +361,7 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from CellML model interface...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
 			try {
 				CellMLModelQuery pq = new CellMLModelQuery();
 				pq.addQueryClause(CellMLModelFieldEnumerator.NONE, s);
@@ -365,7 +371,7 @@ public class MainQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			printVersionResults(results);
 			System.out.println("done");
 		}
 		
@@ -388,7 +394,7 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from publication interface...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
 			try {
 				PublicationQuery pq = new PublicationQuery();
 				pq.addQueryClause(PublicationFieldEnumerator.NONE, s);
@@ -398,7 +404,7 @@ public class MainQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			printVersionResults(results);
 			System.out.println("done");
 		}
 
@@ -451,7 +457,9 @@ public class MainQuery {
 				break;
 			}
 			System.out.println("Retrieving from all interfaces...");
-			List<ModelResultSet> results = null;
+			List<VersionResultSet> results = null;
+			LinkedList<ModelResultSet> groupedResults = null;
+			ModelResultSet[] groupedResultsArray = null;
 			try {
 //				AnnotationQuery aq = new AnnotationQuery();
 //				aq.setBestN(20);
@@ -479,7 +487,7 @@ public class MainQuery {
 //				qL.add(cq);
 				
 				
-		    	List<ModelResultSet> initialAggregateRanker = null;
+		    	List<VersionResultSet> initialAggregateRanker = null;
 		    	
 		       	CellMLModelQuery cq = new CellMLModelQuery();
 		    	cq.addQueryClause(CellMLModelFieldEnumerator.NONE, s);
@@ -506,7 +514,7 @@ public class MainQuery {
 				results = QueryAdapter.executeMultipleQueriesForModels(qL);
 				if (!StringUtils.isEmpty(dumpPath)) ModelResultSetWriter.writeModelResults(results, qL, dumpPath);
 				initialAggregateRanker = ResultSetUtil.collateModelResultSetByModelId(results);
-				List<List<ModelResultSet>> splitResults = RankAggregationUtil.splitModelResultSetByIndex(results);
+				List<List<VersionResultSet>> splitResults = RankAggregationUtil.splitModelResultSetByIndex(results);
 				
 				if(type == RankAggregationType.Types.SUPERVISED_LOCAL_KEMENIZATION){
 					System.out.println("Model Ranker weight:");
@@ -536,10 +544,39 @@ public class MainQuery {
 					
 				results = RankAggregation.aggregate(splitResults, initialAggregateRanker, type, rankersWeights);
 				
+				//group results by version
+				
+				groupedResultsArray = new ModelResultSet[results.size()];
+				HashMap<String, ModelResultSet> modelIdModelsMap = new HashMap<String, ModelResultSet>();
+	    		HashMap<String, Integer> modelIdRankingMap = new HashMap<String, Integer>();
+	    		for(VersionResultSet version: results){
+	    			ModelResultSet newModel;
+	    			if(modelIdModelsMap.containsKey(version.getModelID())){ //if model already exists
+	    				newModel = modelIdModelsMap.get(version.getModelID());
+	    				newModel.addVersion(version); //add the version to the versions list
+	    				if(results.indexOf(version)+1 < modelIdRankingMap.get(version.getModelId())) //if the ranking of the new version is smaller than the ranking of the model
+	    					modelIdRankingMap.put(version.getModelId(), results.indexOf(version)+1); //update ranking of model
+	    				if(version.getScore() > -1) //for scored based rank aggregation methods
+	    					if(version.getScore() > newModel.getScore()) //if the score of the new versions > score of the model
+	    						newModel.setScore(version.getScore()); //update score
+	    				modelIdModelsMap.put(version.getModelID(), newModel);
+	    			}
+	    			else{ //if the model doesn't already exist
+	    				newModel = version.makeModel();  //make a new model out of the version
+	    				modelIdModelsMap.put(version.getModelID(), newModel);
+	    				modelIdRankingMap.put(version.getModelId(), results.indexOf(version)+1);
+	    			}
+	    		}
+	    		for(String modelId: modelIdRankingMap.keySet()){  //make a ranked list of models 
+	    			groupedResultsArray[modelIdRankingMap.get(modelId)-1] = modelIdModelsMap.get(modelId);
+	    		}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			printModelResults(results);
+			groupedResults = new LinkedList<ModelResultSet> (Arrays.asList(groupedResultsArray));
+			printModelResults(groupedResults);
+			//printVersionResults(results);
 		}
 			System.out.println("done");
 
@@ -603,13 +640,13 @@ public class MainQuery {
 	}
 
 	
-	private static void printModelResults(List<ModelResultSet> results){
+	private static void printVersionResults(List<VersionResultSet> results){
 		if ((results != null) && (results.size() > 0)) {
 
 			System.out.println("Found " + results.size() + " results");
-			for (Iterator<ModelResultSet> iterator = results.iterator(); iterator
+			for (Iterator<VersionResultSet> iterator = results.iterator(); iterator
 					.hasNext();) {
-				ModelResultSet resultSet = (ModelResultSet) iterator.next();
+				VersionResultSet resultSet = (VersionResultSet) iterator.next();
 				System.out
 						.println("===============================================");
 				System.out.println(resultSet.getScore());
@@ -627,6 +664,47 @@ public class MainQuery {
 				.println("||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println();
 	}
+	
+	
+	private static void printModelResults(List<ModelResultSet> modelResults){
+		if ((modelResults != null) && (modelResults.size() > 0)) {
+
+			System.out.println("Found " + modelResults.size() + " results");
+			for (Iterator<ModelResultSet> modelIterator = modelResults.iterator(); modelIterator
+					.hasNext();) {
+				ModelResultSet modelResultSet = (ModelResultSet) modelIterator.next();
+				System.out
+						.println("===============================================");
+				System.out.println(modelResultSet.getScore());
+				System.out.println(modelResultSet.getModelName());
+				System.out.println(modelResultSet.getModelId());
+				System.out.println(modelResultSet.getFilename());
+				System.out.println(modelResultSet.getDocumentURI());
+				List<VersionResultSet> versionsResults = modelResultSet.getVersions();
+				System.out.println("Model versions:");
+				for (Iterator<VersionResultSet> versionsIterator = versionsResults.iterator(); versionsIterator
+						.hasNext();) {
+					VersionResultSet versionsResultSet = (VersionResultSet) versionsIterator.next();
+					System.out
+							.println("---------------------------------------------");
+					System.out.println(versionsResultSet.getScore());
+					System.out.println(versionsResultSet.getModelName());
+					System.out.println(versionsResultSet.getModelId());
+					System.out.println(versionsResultSet.getVersionId());
+					System.out.println(versionsResultSet.getFilename());
+					System.out.println(versionsResultSet.getDocumentURI());
+				}
+				//printVersionResults(resultSet.getVersions()); 
+			}
+
+		} else
+			System.out.print("No results!");
+		System.out.println();
+		System.out
+				.println("||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println();
+	}
+	
 	
 	private static void printSedmlResults(List<SedmlResultSet> results){
 		if ((results != null) && (results.size() > 0)) {
