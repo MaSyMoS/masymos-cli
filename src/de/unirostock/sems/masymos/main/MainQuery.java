@@ -1,26 +1,25 @@
 package de.unirostock.sems.masymos.main;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.cypher.internal.frontend.v2_3.perty.recipe.Pretty.group;
-
 import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.QueryAdapter;
+import de.unirostock.sems.masymos.query.aggregation.GroupVersions;
 import de.unirostock.sems.masymos.query.aggregation.RankAggregation;
 import de.unirostock.sems.masymos.query.enumerator.AnnotationFieldEnumerator;
 import de.unirostock.sems.masymos.query.enumerator.CellMLModelFieldEnumerator;
@@ -458,8 +457,8 @@ public class MainQuery {
 			}
 			System.out.println("Retrieving from all interfaces...");
 			List<VersionResultSet> results = null;
-			LinkedList<ModelResultSet> groupedResults = null;
-			ModelResultSet[] groupedResultsArray = null;
+			List<ModelResultSet> groupedResults = new LinkedList<ModelResultSet>();
+			
 			try {
 //				AnnotationQuery aq = new AnnotationQuery();
 //				aq.setBestN(20);
@@ -545,38 +544,15 @@ public class MainQuery {
 				results = RankAggregation.aggregate(splitResults, initialAggregateRanker, type, rankersWeights);
 				
 				//group results by version
-				
-				groupedResultsArray = new ModelResultSet[results.size()];
-				HashMap<String, ModelResultSet> modelIdModelsMap = new HashMap<String, ModelResultSet>();
-	    		HashMap<String, Integer> modelIdRankingMap = new HashMap<String, Integer>();
-	    		for(VersionResultSet version: results){
-	    			ModelResultSet newModel;
-	    			if(modelIdModelsMap.containsKey(version.getModelID())){ //if model already exists
-	    				newModel = modelIdModelsMap.get(version.getModelID());
-	    				newModel.addVersion(version); //add the version to the versions list
-	    				if(results.indexOf(version)+1 < modelIdRankingMap.get(version.getModelId())) //if the ranking of the new version is smaller than the ranking of the model
-	    					modelIdRankingMap.put(version.getModelId(), results.indexOf(version)+1); //update ranking of model
-	    				if(version.getScore() > -1) //for scored based rank aggregation methods
-	    					if(version.getScore() > newModel.getScore()) //if the score of the new versions > score of the model
-	    						newModel.setScore(version.getScore()); //update score
-	    				modelIdModelsMap.put(version.getModelID(), newModel);
-	    			}
-	    			else{ //if the model doesn't already exist
-	    				newModel = version.makeModel();  //make a new model out of the version
-	    				modelIdModelsMap.put(version.getModelID(), newModel);
-	    				modelIdRankingMap.put(version.getModelId(), results.indexOf(version)+1);
-	    			}
-	    		}
-	    		for(String modelId: modelIdRankingMap.keySet()){  //make a ranked list of models 
-	    			groupedResultsArray[modelIdRankingMap.get(modelId)-1] = modelIdModelsMap.get(modelId);
-	    		}
-				
+				groupedResults = GroupVersions.groupVersions(results);
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			groupedResults = new LinkedList<ModelResultSet> (Arrays.asList(groupedResultsArray));
-			printModelResults(groupedResults);
-			//printVersionResults(results);
+			
+			//OUTPUT
+			printModelResultsToFile(groupedResults, s, type.toString());
+			printVersionResultsToFile(results, s, type.toString());
 		}
 			System.out.println("done");
 
@@ -640,9 +616,48 @@ public class MainQuery {
 	}
 
 	
+	private static void printVersionResultsToFile(List<VersionResultSet> results, String query, String raType){
+		try {
+			StringBuilder sb = new StringBuilder(query);
+			sb.append(raType);
+			sb.append("versions.txt");
+			String fileName = sb.toString();
+			fileName = fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+			PrintWriter writer;
+			writer = new PrintWriter(fileName, "UTF-8");
+			if ((results != null) && (results.size() > 0)) {
+				writer.println("Found " + results.size() + " results");
+				for (Iterator<VersionResultSet> iterator = results.iterator(); iterator
+						.hasNext();) {
+					VersionResultSet resultSet = (VersionResultSet) iterator.next();
+					writer
+							.println("===============================================");
+					writer.println(resultSet.getScore());
+					writer.println(resultSet.getModelName());
+					writer.println(resultSet.getModelId());
+					writer.println(resultSet.getVersionId());
+					writer.println(resultSet.getFilename());
+					writer.println(resultSet.getDocumentURI());
+				}
+			} else
+				System.out.print("No results!");
+			System.out.println();
+			System.out
+					.println("||||||||||||||||||||||||||||||||||||||||||||||||");
+			System.out.println();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+	
+	
 	private static void printVersionResults(List<VersionResultSet> results){
 		if ((results != null) && (results.size() > 0)) {
-
 			System.out.println("Found " + results.size() + " results");
 			for (Iterator<VersionResultSet> iterator = results.iterator(); iterator
 					.hasNext();) {
@@ -656,7 +671,6 @@ public class MainQuery {
 				System.out.println(resultSet.getFilename());
 				System.out.println(resultSet.getDocumentURI());
 			}
-
 		} else
 			System.out.print("No results!");
 		System.out.println();
@@ -664,7 +678,6 @@ public class MainQuery {
 				.println("||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println();
 	}
-	
 	
 	private static void printModelResults(List<ModelResultSet> modelResults){
 		if ((modelResults != null) && (modelResults.size() > 0)) {
@@ -703,6 +716,65 @@ public class MainQuery {
 		System.out
 				.println("||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println();
+	}
+	
+	
+	private static void printModelResultsToFile(List<ModelResultSet> modelResults, String query, String raType){
+		PrintWriter writer;
+		try {
+			StringBuilder sb = new StringBuilder(query);
+			sb.append(raType);
+			sb.append("models.txt");
+			String fileName = sb.toString();
+			fileName = fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+
+			writer = new PrintWriter(fileName, "UTF-8");
+			if ((modelResults != null) && (modelResults.size() > 0)) {
+
+				writer.println("Found " + modelResults.size() + " results");
+				for (Iterator<ModelResultSet> modelIterator = modelResults.iterator(); modelIterator
+						.hasNext();) {
+					ModelResultSet modelResultSet = (ModelResultSet) modelIterator.next();
+					writer
+							.println("===============================================");
+					writer.println(modelResultSet.getScore());
+					writer.println(modelResultSet.getModelName());
+					writer.println(modelResultSet.getModelId());
+					writer.println(modelResultSet.getFilename());
+					writer.println(modelResultSet.getDocumentURI());
+					List<VersionResultSet> versionsResults = modelResultSet.getVersions();
+					writer.println("Model versions:");
+					for (Iterator<VersionResultSet> versionsIterator = versionsResults.iterator(); versionsIterator
+							.hasNext();) {
+						VersionResultSet versionsResultSet = (VersionResultSet) versionsIterator.next();
+						writer
+								.println("---------------------------------------------");
+						writer.println(versionsResultSet.getScore());
+						writer.println(versionsResultSet.getModelName());
+						writer.println(versionsResultSet.getModelId());
+						writer.println(versionsResultSet.getVersionId());
+						writer.println(versionsResultSet.getFilename());
+						writer.println(versionsResultSet.getDocumentURI());
+						writer.println(versionsResultSet.getFileId());
+					}
+					//printVersionResults(resultSet.getVersions()); 
+				}
+
+			} else
+				writer.print("No results!");
+			writer.println();
+			writer
+					.println("||||||||||||||||||||||||||||||||||||||||||||||||");
+			writer.println();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	
