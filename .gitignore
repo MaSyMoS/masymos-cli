@@ -4,3 +4,4 @@
 .project
 .classpath
 *.log
+dependency-reduced-pom.xml
