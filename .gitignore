@@ -4,3 +4,13 @@
 .project
 .classpath
 *.log
+/c_DEFAULTmodels.txt
+/c_DEFAULTversions.txt
+/cellCOMB_MNZmodels.txt
+/cellCOMB_MNZversions.txt
+/edelsteinADJACENT_PAIRSmodels.txt
+/edelsteinADJACENT_PAIRSversions.txt
+/novakCOMB_MNZmodels.txt
+/novakCOMB_MNZversions.txt
+/tysonCOMB_MNZmodels.txt
+/tysonCOMB_MNZversions.txt
