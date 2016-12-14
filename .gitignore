@@ -4,6 +4,7 @@
 .project
 .classpath
 *.log
+<<<<<<< HEAD
 /c_DEFAULTmodels.txt
 /c_DEFAULTversions.txt
 /cellCOMB_MNZmodels.txt
@@ -14,3 +15,6 @@
 /novakCOMB_MNZversions.txt
 /tysonCOMB_MNZmodels.txt
 /tysonCOMB_MNZversions.txt
+=======
+dependency-reduced-pom.xml
+>>>>>>> branch 'master' of gitolite@sems.uni-rostock.de:masymos-cli
