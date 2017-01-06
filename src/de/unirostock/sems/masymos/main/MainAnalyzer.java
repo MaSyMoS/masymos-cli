@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.Property;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainAnalyzer {
 	
 	final static Logger logger = LoggerFactory.getLogger(MainAnalyzer.class);

@@ -13,6 +13,11 @@ import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.database.Manager;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainIndex {
 
 	static boolean deleteIndex = false;

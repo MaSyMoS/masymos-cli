@@ -22,6 +22,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.ModelDeleter;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainDelete {
 
 	private static final String queryString = "MATCH (id:GlobalUniqueId) RETURN id.count AS latest_id";

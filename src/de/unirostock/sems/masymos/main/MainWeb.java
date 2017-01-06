@@ -15,6 +15,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.ModelInserter;
 import de.unirostock.sems.masymos.util.ModelDataHolder;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainWeb {
 
 	public static void main(String[] args) {

@@ -43,6 +43,11 @@ import de.unirostock.sems.masymos.extractor.SedML.SEDMLExtractor;
 import de.unirostock.sems.masymos.extractor.SedML.SEDMLExtractorThread;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainExtractor {
 
 	static boolean quiet = false;

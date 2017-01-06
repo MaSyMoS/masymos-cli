@@ -7,12 +7,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
 import de.unirostock.sems.masymos.configuration.Config;
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.data.PersonWrapper;
@@ -29,10 +29,10 @@ import de.unirostock.sems.masymos.query.enumerator.SBMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.enumerator.SedmlFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
-import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.PersonResultSet;
 import de.unirostock.sems.masymos.query.results.PublicationResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.structure.StructureQuery;
 import de.unirostock.sems.masymos.query.types.AnnotationQuery;
 import de.unirostock.sems.masymos.query.types.CellMLModelQuery;
@@ -45,6 +45,11 @@ import de.unirostock.sems.masymos.util.RankAggregationUtil;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 import de.unirostock.sems.masymos.util.SBGN2Cypher;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainQuery {
 	
 	private static String dumpPath = null;

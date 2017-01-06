@@ -27,6 +27,11 @@ import de.unirostock.sems.masymos.util.Assign;
 import de.unirostock.sems.masymos.util.HungarianAlgorithm;
 import de.unirostock.sems.masymos.util.OntologyUtil;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class MainStats {
 
 	static List<String> lsbo15M4F = new LinkedList<String>(Arrays.asList(
