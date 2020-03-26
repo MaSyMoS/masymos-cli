@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## 0.9.1 - 2016-07-28
-- TODO @henkelr
+- adapted to MaSyMoS-core
 
 
 
