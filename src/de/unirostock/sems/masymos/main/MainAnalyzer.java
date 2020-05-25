@@ -10,8 +10,7 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.Property;
@@ -23,7 +22,7 @@ import de.unirostock.sems.masymos.configuration.Property;
 */
 public class MainAnalyzer {
 	
-	final static Logger logger = LoggerFactory.getLogger(MainAnalyzer.class);
+	final static Logger logger = Logger.getLogger(MainAnalyzer.class);
 
 	public static void main(String[] args) {
 /*
