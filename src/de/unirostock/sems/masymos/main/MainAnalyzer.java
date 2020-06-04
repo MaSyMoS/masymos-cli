@@ -22,7 +22,7 @@ import de.unirostock.sems.masymos.configuration.Property;
 */
 public class MainAnalyzer {
 	
-	final static Logger logger = Logger.getLogger(MainAnalyzer.class);
+	static final Logger logger = Logger.getLogger(MainAnalyzer.class);
 
 	public static void main(String[] args) {
 /*
