@@ -8,8 +8,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- added eclipse preferences and project meta-data
+- added CHANGELOG.md
 
 ### Changed
+- [changed logging framework to work with the libraries](https://github.com/MaSyMoS/masymos-core/issues/5)
+- [fixed small things](https://github.com/MaSyMoS/masymos-core/issues/3)
+    - correct order of `static final`
+    - force code and outcome to UTF-8 in pom of all projects
+    - fix encoding and line breaks of all files
 
 ### Removed
 
@@ -37,4 +44,3 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
-
