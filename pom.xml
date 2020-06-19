@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.unirostock.sems.masymos</groupId>
 	<artifactId>masymos-cli</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>jar</packaging>
 	<name>morre_withoutDepencencies</name>
 
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>de.unirostock.sems.masymos</groupId>
 			<artifactId>masymos-core</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 	</dependencies>
 </project>
